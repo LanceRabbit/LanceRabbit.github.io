@@ -30,7 +30,8 @@ curl https://circleci.com/api/v1.1/project/github/bar/foo/config-translation?cir
 
 這邊選擇第二種，是因已有權限可以進行該專案的操作。
 
-只要在browser(瀏覽器)上的URL網址列直接下`https://circleci.com/api/v1.1/project/github/bar/foo/config-translation`
+只要在browser(瀏覽器)上的URL網址列直接下
+`https://circleci.com/api/v1.1/project/github/bar/foo/config-translation`
 
 bar/foo 請更換成自己team/account下的專案
 
