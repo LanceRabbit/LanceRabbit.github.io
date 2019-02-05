@@ -1,5 +1,5 @@
 ---
-title: CircleCI_update_1_to_2
+title: CircleCI update from 1.0 to 2.0
 date: 2018-08-02 19:51:14
 tags: ["CircleCI"]
 categories: ["CircleCI"]
