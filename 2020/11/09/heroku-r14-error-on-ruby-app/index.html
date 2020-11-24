@@ -30,7 +30,7 @@
 <meta property="og:locale" content="zh-tw">
 <meta property="og:image" content="https://github.com/LanceRabbit/LanceRabbit.github.io/blob/source/source/images/202011/prodcution.png?raw=true">
 <meta property="og:image" content="https://github.com/LanceRabbit/LanceRabbit.github.io/blob/source/source/images/202011/staging-L.png?raw=true">
-<meta property="og:updated_time" content="2020-11-24T12:40:55.862Z">
+<meta property="og:updated_time" content="2020-11-24T12:49:10.638Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Heroku R14 Error with Ruby on Rails app">
 <meta name="twitter:description" content="緣由這次開發維護的專案是使用 Heroku 作為運行服務的平台, 近期遇到了 R14 - Memory quota exceeded 這個問題.">
@@ -235,7 +235,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-11-24 20:40:55" itemprop="dateModified" datetime="2020-11-24T20:40:55+08:00">2020-11-24</time>
+                <time title="Modified: 2020-11-24 20:49:10" itemprop="dateModified" datetime="2020-11-24T20:49:10+08:00">2020-11-24</time>
               </span>
 
           
@@ -266,8 +266,7 @@
         <h2 id="緣由"><a href="#緣由" class="headerlink" title="緣由"></a>緣由</h2><p>這次開發維護的專案是使用 Heroku 作為運行服務的平台, 近期遇到了 <a href="https://devcenter.heroku.com/articles/error-codes#r14-memory-quota-exceeded" rel="nofollow noopener noreferrer" target="_blank">R14 - Memory quota exceeded</a> 這個問題.</p>
 <a id="more"></a>
 <h2 id="以為是-Memory-Leak"><a href="#以為是-Memory-Leak" class="headerlink" title="以為是 Memory Leak"></a>以為是 Memory Leak</h2><p>一開始以為是這個是 Memory Leak 的情況, 是因為機器的 Memory Usage 的呈現狀況(如下圖1)看起來像是 Memory Leak 造成的.</p>
-<p><img src="https://github.com/LanceRabbit/LanceRabbit.github.io/blob/source/source/images/202011/prodcution.png?raw=true" alt="production.png"></p>
-<p>(圖1 - Memory Usage - Production)</p>
+<p><img src="https://github.com/LanceRabbit/LanceRabbit.github.io/blob/source/source/images/202011/prodcution.png?raw=true" alt="production.png"><br>(圖1 - Memory Usage - Production)</p>
 <p>一開始先在 Local 確認程式運行狀況, 確認程式的執行有無一次撈取大量資料的動作.</p>
 <p>接著在<a href="https://devcenter.heroku.com/" rel="nofollow noopener noreferrer" target="_blank">R14 - Memory Quota Exceeded in Ruby (MRI)</a> 查看相關的問題以及排除. 接著又看到關鍵詞 <a href="https://devcenter.heroku.com/articles/ruby-memory-use#memory-leaks" rel="nofollow noopener noreferrer" target="_blank">Memory leaks</a></p>
 <p>就整個陷落在要如何找到方法解決 Ruby 的 Memory Leak 泥沼內.</p>
@@ -287,9 +286,8 @@
 <p>確認是否有設定到</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> heroku run bash -a app_name</span><br><span class="line">~$ env | grep MALLOC_ARENA_MAX</span><br><span class="line">MALLOC_ARENA_MAX=2</span><br></pre></td></tr></table></figure>
 <p>以下是先經過 Staging 機器的設定後的測試狀況, 很明顯設定 <code>MALLOC_ARENA_MAX</code> 後, 記憶體的用量並沒有大量瞬間被使用的狀況發生.</p>
-<p><img src="https://github.com/LanceRabbit/LanceRabbit.github.io/blob/source/source/images/202011/staging-L.png?raw=true" alt="staging.png"></p>
-<p>(圖2 - Memory Usage - Staging)</p>
-<h2 id="進階做法"><a href="#進階做法" class="headerlink" title="進階做法"></a>進階做法</h2><p>調整 jemalloc, 這部分可以參考<br><a href="https://www.speedshop.co/2017/12/04/malloc-doubles-ruby-memory.html" rel="nofollow noopener noreferrer" target="_blank">malloc-doubles-ruby-memory</a><br>這個解決方式.</p>
+<p><img src="https://github.com/LanceRabbit/LanceRabbit.github.io/blob/source/source/images/202011/staging-L.png?raw=true" alt="staging.png"><br>(圖2 - Memory Usage - Staging)</p>
+<h2 id="進階做法"><a href="#進階做法" class="headerlink" title="進階做法"></a>進階做法</h2><p>調整 jemalloc, 這部分可以參考<a href="https://www.speedshop.co/2017/12/04/malloc-doubles-ruby-memory.html" rel="nofollow noopener noreferrer" target="_blank">malloc-doubles-ruby-memory</a>這個解決方式.</p>
 
     </div>
 
