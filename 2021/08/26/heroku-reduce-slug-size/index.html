@@ -20,18 +20,18 @@
     var CONFIG = {"hostname":"lancerabbit.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"appID":"POVRXJ05RN","apiKey":"aa6537937bb09c016b4fbbb3672bd6df","indexName":"POVRXJ05RN","hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="緣由在執行 deploy project to Heroku 時出現了slug size is too large的訊息。 1Compiled slug size: 505.5M is too large (max is 500M). 經確認後，是因為新增使用 wkhtmltopdf 來匯出 pdf 檔案，導致整個專案 size 變大。 處理流程確認檔案大小登入 heroku 機器的 bash 執">
+  <meta name="description" content="緣由在執行 deploy project to Heroku 時出現了slug size is too large的訊息。 1Compiled slug size: 505.5M is too large (max is 500M). 經確認後，是因為新增使用 wkhtmltopdf 來匯出 pdf 檔案，導致整個專案 size 變大。">
 <meta name="keywords" content="heroku rails">
 <meta property="og:type" content="article">
 <meta property="og:title" content="heroku-reduce-slug-size">
 <meta property="og:url" content="https://lancerabbit.github.io/2021/08/26/heroku-reduce-slug-size/index.html">
 <meta property="og:site_name" content="技術雜記">
-<meta property="og:description" content="緣由在執行 deploy project to Heroku 時出現了slug size is too large的訊息。 1Compiled slug size: 505.5M is too large (max is 500M). 經確認後，是因為新增使用 wkhtmltopdf 來匯出 pdf 檔案，導致整個專案 size 變大。 處理流程確認檔案大小登入 heroku 機器的 bash 執">
+<meta property="og:description" content="緣由在執行 deploy project to Heroku 時出現了slug size is too large的訊息。 1Compiled slug size: 505.5M is too large (max is 500M). 經確認後，是因為新增使用 wkhtmltopdf 來匯出 pdf 檔案，導致整個專案 size 變大。">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2021-08-26T02:35:41.584Z">
+<meta property="og:updated_time" content="2021-08-26T02:48:27.356Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="heroku-reduce-slug-size">
-<meta name="twitter:description" content="緣由在執行 deploy project to Heroku 時出現了slug size is too large的訊息。 1Compiled slug size: 505.5M is too large (max is 500M). 經確認後，是因為新增使用 wkhtmltopdf 來匯出 pdf 檔案，導致整個專案 size 變大。 處理流程確認檔案大小登入 heroku 機器的 bash 執">
+<meta name="twitter:description" content="緣由在執行 deploy project to Heroku 時出現了slug size is too large的訊息。 1Compiled slug size: 505.5M is too large (max is 500M). 經確認後，是因為新增使用 wkhtmltopdf 來匯出 pdf 檔案，導致整個專案 size 變大。">
 
 <link rel="canonical" href="https://lancerabbit.github.io/2021/08/26/heroku-reduce-slug-size/">
 
@@ -226,7 +226,7 @@
               <span class="post-meta-item-text">Posted on</span>
               
 
-              <time title="Created: 2021-08-26 10:05:07 / Modified: 10:35:41" itemprop="dateCreated datePublished" datetime="2021-08-26T10:05:07+08:00">2021-08-26</time>
+              <time title="Created: 2021-08-26 10:05:07 / Modified: 10:48:27" itemprop="dateCreated datePublished" datetime="2021-08-26T10:05:07+08:00">2021-08-26</time>
             </span>
 
           
@@ -257,6 +257,7 @@
         <h2 id="緣由"><a href="#緣由" class="headerlink" title="緣由"></a>緣由</h2><p>在執行 deploy project to Heroku 時出現了<code>slug size is too large</code>的訊息。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Compiled slug size: 505.5M is too large (max is 500M).</span><br></pre></td></tr></table></figure>
 <p>經確認後，是因為新增使用 <code>wkhtmltopdf</code> 來匯出 pdf 檔案，導致整個專案 size 變大。</p>
+<a id="more"></a>
 <h2 id="處理流程"><a href="#處理流程" class="headerlink" title="處理流程"></a>處理流程</h2><h3 id="確認檔案大小"><a href="#確認檔案大小" class="headerlink" title="確認檔案大小"></a>確認檔案大小</h3><p>登入 heroku 機器的 bash 執行指令 <code>du -sh * | sort -hr</code></p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">du -sh * | sort -hr</span><br><span class="line">463M	vendor</span><br><span class="line">225M	node_modules</span><br><span class="line">103M	public</span><br><span class="line">91M	tmp</span><br><span class="line">31M	app</span><br><span class="line">1.4M	spec</span><br><span class="line">548K	db</span><br><span class="line">436K	styleguide</span><br><span class="line">432K	config</span><br><span class="line">252K	package-lock.json</span><br><span class="line">240K	myVim.log</span><br><span class="line">108K	lib</span><br><span class="line">60K	test</span><br><span class="line">36K	bin</span><br><span class="line">20K	Gemfile.lock</span><br><span class="line">4.0K	README.md</span><br><span class="line">4.0K	Rakefile</span><br><span class="line">4.0K	Procfile</span><br><span class="line">4.0K	package.json</span><br><span class="line">4.0K	log</span><br><span class="line">4.0K	Guardfile</span><br><span class="line">4.0K	Gemfile</span><br><span class="line">4.0K	environment_url.txt</span><br><span class="line">4.0K	CONTRIBUTING.md</span><br><span class="line">4.0K	config.ru</span><br><span class="line">4.0K	Capfile</span><br><span class="line">4.0K	app.json</span><br><span class="line">0	@1</span><br></pre></td></tr></table></figure>
 <p>發現<code>vendor</code>空間使用達 <code>463M</code>,  以及<code>node_module</code> 也佔用了 <code>225M</code></p>
