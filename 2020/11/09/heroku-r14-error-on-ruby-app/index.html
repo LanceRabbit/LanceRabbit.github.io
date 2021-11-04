@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"lancerabbit.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"appID":"YHI8RRBQ5F","apiKey":"9bb2696f299a0ecf44d540cf8f894031","indexName":"YHI8RRBQ5F","hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="緣由這次開發維護的專案是使用 Heroku 作為運行服務的平台, 近期遇到了 R14 - Memory quota exceeded 這個問題.">
+<meta name="keywords" content="ruby,heroku,R14,memory bloat">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Heroku R14 Error with Ruby on Rails app">
+<meta property="og:url" content="https://lancerabbit.github.io/2020/11/09/heroku-r14-error-on-ruby-app/index.html">
+<meta property="og:site_name" content="技術雜記">
+<meta property="og:description" content="緣由這次開發維護的專案是使用 Heroku 作為運行服務的平台, 近期遇到了 R14 - Memory quota exceeded 這個問題.">
+<meta property="og:locale" content="zh-tw">
+<meta property="og:image" content="https://github.com/LanceRabbit/LanceRabbit.github.io/blob/source/source/images/202011/prodcution.png?raw=true">
+<meta property="og:image" content="https://github.com/LanceRabbit/LanceRabbit.github.io/blob/source/source/images/202011/staging-L.png?raw=true">
+<meta property="og:updated_time" content="2020-11-25T14:10:19.500Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Heroku R14 Error with Ruby on Rails app">
+<meta name="twitter:description" content="緣由這次開發維護的專案是使用 Heroku 作為運行服務的平台, 近期遇到了 R14 - Memory quota exceeded 這個問題.">
+<meta name="twitter:image" content="https://github.com/LanceRabbit/LanceRabbit.github.io/blob/source/source/images/202011/prodcution.png?raw=true">
+
+<link rel="canonical" href="https://lancerabbit.github.io/2020/11/09/heroku-r14-error-on-ruby-app/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-tw'
+  };
+</script>
+
+  <title>Heroku R14 Error with Ruby on Rails app | 技術雜記</title>
+  
+    <script>
+      function sendPageView() {
+        if (CONFIG.hostname !== location.hostname) return;
+        var uid = localStorage.getItem('uid') || (Math.random() + '.' + Math.random());
+        localStorage.setItem('uid', uid);
+        navigator.sendBeacon('https://www.google-analytics.com/collect', new URLSearchParams({
+          v  : 1,
+          tid: 'UA-154543096-1',
+          cid: uid,
+          t  : 'pageview',
+          dp : encodeURIComponent(location.pathname)
+        }));
+      }
+      document.addEventListener('pjax:complete', sendPageView);
+      sendPageView();
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">技術雜記</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="th fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="algolia-results">
+  <div id="algolia-stats"></div>
+  <div id="algolia-hits"></div>
+  <div id="algolia-pagination" class="algolia-pagination"></div>
+</div>
+
+      
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://lancerabbit.github.io/2020/11/09/heroku-r14-error-on-ruby-app/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="LanceRabbit">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="技術雜記">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Heroku R14 Error with Ruby on Rails app
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-11-09 23:48:50" itemprop="dateCreated datePublished" datetime="2020-11-09T23:48:50+08:00">2020-11-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-11-25 22:10:19" itemprop="dateModified" datetime="2020-11-25T22:10:19+08:00">2020-11-25</time>
+              </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/2020/11/09/heroku-r14-error-on-ruby-app/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2020/11/09/heroku-r14-error-on-ruby-app/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="緣由"><a href="#緣由" class="headerlink" title="緣由"></a>緣由</h2><p>這次開發維護的專案是使用 Heroku 作為運行服務的平台, 近期遇到了 <a href="https://devcenter.heroku.com/articles/error-codes#r14-memory-quota-exceeded" rel="nofollow noopener noreferrer" target="_blank">R14 - Memory quota exceeded</a> 這個問題.</p>
+<a id="more"></a>
+<h2 id="以為是-Memory-Leak"><a href="#以為是-Memory-Leak" class="headerlink" title="以為是 Memory Leak"></a>以為是 Memory Leak</h2><p>一開始以為是這個是 Memory Leak 的情況, 是因為機器的 Memory Usage 的呈現狀況(如下圖1)看起來像是 Memory Leak 造成的.</p>
+<p><img src="https://github.com/LanceRabbit/LanceRabbit.github.io/blob/source/source/images/202011/prodcution.png?raw=true" alt="production.png"><br>(圖1 - Memory Usage - Production)</p>
+<p>一開始先在 Local 確認程式運行狀況, 確認程式的執行有無一次撈取大量資料的動作.</p>
+<p>接著在<a href="https://devcenter.heroku.com/" rel="nofollow noopener noreferrer" target="_blank">R14 - Memory Quota Exceeded in Ruby (MRI)</a> 查看相關的問題以及排除. 接著又看到關鍵詞<a href="https://devcenter.heroku.com/articles/ruby-memory-use#memory-leaks" rel="nofollow noopener noreferrer" target="_blank">Memory leaks</a>就整個陷落在要如何找到方法解決 Ruby 的 Memory Leak 泥沼內.</p>
+<h2 id="最後則確認是-Memory-Bloat"><a href="#最後則確認是-Memory-Bloat" class="headerlink" title="最後則確認是 Memory Bloat"></a>最後則確認是 Memory Bloat</h2><p>這件事一直持續花時間看了一到兩週的時間, 直到搜尋到 Memory Bloat.</p>
+<p>造成 Memory bloat 的原因, 是因為記憶體碎片化(Memory Fragmentation).</p>
+<p>這邊就簡單說明 Memory Bloat 的造成的原因之一.</p>
+<p>一開始記憶體空間都未使用, 應用程式會先請求(allocate) 一些記憶體空間.</p>
+<p>但是釋放時間點不同時, 導致記憶體空間被切割成零散的狀況, 導致應用程式需要 allocate 較大的記憶空間時, 出現問題</p>
+<p>這個狀況就導致了記憶體空間的浪費.</p>
+<p>不同於 Memory leak, Memory bloat 會造成 Memory 使用量瞬間增大, 而 Memory leak 則緩慢增長.</p>
+<p>這個部分可以回到圖1, 可以看到機器重啟後, 記憶體被大量 allocate 掉一大部分.</p>
+<p>後來朝著這個方向去找相關資訊, 就找到了 Heroku 提供的 <a href="https://devcenter.heroku.com/articles/tuning-glibc-memory-behavior#when-to-tune-malloc_arena_max" rel="nofollow noopener noreferrer" target="_blank">malloc_arena_max</a><br>這個解決方式.</p>
+<h2 id="設定參數-MALLOC-ARENA-MAX-流程"><a href="#設定參數-MALLOC-ARENA-MAX-流程" class="headerlink" title="設定參數 MALLOC_ARENA_MAX 流程"></a>設定參數 MALLOC_ARENA_MAX 流程</h2><p>先確認機器是否有設定 <code>MALLOC_ARENA_MAX</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> heroku run bash -a app_name</span><br><span class="line">~$ env | grep MALLOC_ARENA_MAX</span><br></pre></td></tr></table></figure>
+<p>若沒有設定的話, 就用以下方式設定. 設定之後機器會自動重啟</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">heroku config:set MALLOC_ARENA_MAX=2 -a app_name</span><br></pre></td></tr></table></figure>
+<p>確認是否有設定到</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> heroku run bash -a app_name</span><br><span class="line">~$ env | grep MALLOC_ARENA_MAX</span><br><span class="line">MALLOC_ARENA_MAX=2</span><br></pre></td></tr></table></figure>
+<p>以下是先經過 Staging 機器的設定後的測試狀況, 很明顯設定 <code>MALLOC_ARENA_MAX</code> 後, 記憶體的用量並沒有大量瞬間被使用的狀況發生.</p>
+<p><img src="https://github.com/LanceRabbit/LanceRabbit.github.io/blob/source/source/images/202011/staging-L.png?raw=true" alt="staging.png"><br>(圖2 - Memory Usage - Staging)</p>
+<h2 id="進階做法"><a href="#進階做法" class="headerlink" title="進階做法"></a>進階做法</h2><p>調整 jemalloc, 這部分可以參考<a href="https://www.speedshop.co/2017/12/04/malloc-doubles-ruby-memory.html" rel="nofollow noopener noreferrer" target="_blank">malloc-doubles-ruby-memory</a>這個解決方式.</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ruby/" rel="tag"># ruby</a>
+              <a href="/tags/heroku/" rel="tag"># heroku</a>
+              <a href="/tags/R14/" rel="tag"># R14</a>
+              <a href="/tags/memory-bloat/" rel="tag"># memory bloat</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/07/19/use-arel-sql-in-rails/" rel="prev" title="如何在 Rails 中 使用 Arel sql">
+      <i class="fa fa-chevron-left"></i> 如何在 Rails 中 使用 Arel sql
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/08/26/heroku-reduce-slug-size/" rel="next" title="heroku-reduce-slug-size">
+      heroku-reduce-slug-size <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#緣由"><span class="nav-number">1.</span> <span class="nav-text">緣由</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#以為是-Memory-Leak"><span class="nav-number">2.</span> <span class="nav-text">以為是 Memory Leak</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#最後則確認是-Memory-Bloat"><span class="nav-number">3.</span> <span class="nav-text">最後則確認是 Memory Bloat</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#設定參數-MALLOC-ARENA-MAX-流程"><span class="nav-number">4.</span> <span class="nav-text">設定參數 MALLOC_ARENA_MAX 流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#進階做法"><span class="nav-number">5.</span> <span class="nav-text">進階做法</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">LanceRabbit</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">9</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/LanceRabbit" title="GitHub → https://github.com/LanceRabbit" rel="noopener" target="_blank"><i class="fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://chilunhuang.github.io" title="https://chilunhuang.github.io" rel="noopener" target="_blank">C.L.H Lab</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">LanceRabbit</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+  
+<script src="//cdn.jsdelivr.net/npm/algoliasearch@4/dist/algoliasearch-lite.umd.js"></script>
+<script src="//cdn.jsdelivr.net/npm/instantsearch.js@4/dist/instantsearch.production.min.js"></script><script src="/js/algolia-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://lancerabbit.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://lancerabbit.github.io/2020/11/09/heroku-r14-error-on-ruby-app/";
+    this.page.identifier = "2020/11/09/heroku-r14-error-on-ruby-app/";
+    this.page.title = "Heroku R14 Error with Ruby on Rails app";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://lancerabbit.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>
